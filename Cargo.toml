@@ -8,8 +8,13 @@ edition = "2021"
 [dependencies]
 base64 = "0.22.0"
 bitflags = "2.5.0"
+embedded-graphics = "0.8.1"
 num_enum = "0.7.2"
 snmp = { version = "0.2.2", optional = true }
+image = "0.25.1"
+embedded-graphics-simulator = "0.6.0"
+log = "0.4.22"
+anyhow = "1.0.86"
 
 [features]
 default = ["net"]

@@ -1,7 +1,6 @@
 use bitflags::bitflags;
 
-use crate::{prelude::*, printer::PTouchPrinter, status::MediaKind};
-
+use crate::{commands, prelude::*, printer::PTouchPrinter, status::MediaKind};
 // Raw command API for the PTouch device.
 /// This provides low-level access to the device (if desired)
 pub trait Commands {
@@ -56,6 +55,9 @@ pub trait Commands {
 
     /// Start a print and feed
     fn print_and_feed(&mut self) -> Result<()>;
+    
+    /// prints rendered data shape vecvecu8
+    fn print_data(&mut self, data: Vec<Vec<u8>>) -> Result<()>;
 }
 
 /// Low-level command API implementation
@@ -179,9 +181,42 @@ impl<I: PTouchInterface> Commands for PTouchPrinter<I> {
         buff.extend_from_slice(data);
 
         // trace!("Raster transfer: {:02x?}", &buff[..3 + data.len()]);
-        println!("Raster transfer: {:02x?}", &buff);
+        // println!("Raster transfer: {:02x?}", &buff);
 
         self.write(buff.as_slice())
+    }
+    
+    fn print_data(&mut self, data: Vec<Vec<u8>>) -> Result<()>{ 
+        self.invalidate()?;
+        self.init()?;
+        
+        self.switch_mode(Mode::Raster)?;
+        
+        let pi = PrintInfo {
+            kind: Some(crate::status::MediaKind::ContinuousLengthTape),
+            width: Some(62),
+            length: None,
+            raster_no: 1,
+            recover: true,
+        };
+        self.set_print_info(&pi)?;
+
+        self.set_various_mode(VariousMode::AUTO_CUT)?;
+        // printer.set_advanced_mode(AdvancedMode::);
+        self.set_page_no(1)?;
+
+        self.set_margin(0)?;
+        self.set_compression_mode(CompressionMode::None)?;
+
+        for line in data {
+            self.transfer_raster_line(&line).expect("Failed to transfer raster line");
+        }
+
+        self.print_and_feed()?;
+
+        self.flush();
+        Ok(())
+        
     }
 
     fn raster_zero(&mut self) -> Result<()> {

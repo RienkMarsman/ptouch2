@@ -110,7 +110,6 @@ impl<D: PTouchInterface> PTouchPrinter<D> {
             self.interface.write(buffer.as_slice())?;
             buffer.clear();
         }
-
         Ok(())
     }
 
