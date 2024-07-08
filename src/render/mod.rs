@@ -10,11 +10,14 @@ use embedded_graphics_simulator::{
 };
 use crate::prelude::display::{Display, DrawPixel};
 use crate::PTouchError;
+use crate::render::qr_code::{Mask, QrCode, QrCodeEcc, Version};
+use crate::render::qr_code_embedded_graphic::StyledQrCode;
 
 pub mod display;
 pub mod ops;
 mod text;
 mod qr_code;
+mod qr_code_embedded_graphic;
 
 #[derive(Debug, Clone, Copy)]
 pub enum Orientation {
@@ -69,6 +72,45 @@ impl Render {
         Ok(())
     }
 
+    pub fn render_qrcode(&mut self, link: &str, point: Point) -> Result<(), PTouchError> {
+        let ecc = QrCodeEcc::Medium; // Choose an error correction level
+        let version = Version::new(1); // Choose a version
+        let max_version = Version::new(40); // Define the max version
+        let mask: Option<Mask> = None; // Automatically choose the mask
+        let mut tempbuffer = vec![0u8; max_version.buffer_len()]; // Temporary buffer
+        let mut outbuffer = vec![0u8; max_version.buffer_len()]; // Output buffer
+
+        // Encode the text into a QR code
+        let qrcode = QrCode::encode_text(
+            link,
+            &mut tempbuffer,
+            &mut outbuffer,
+            ecc,
+            version,
+            max_version,
+            mask,
+            true,
+        ).map_err(|_| PTouchError::RenderError)?;
+
+        // // Draw the QR code on the display
+        // let size = qrcode.size();
+        // for y in 0..size {
+        //     for x in 0..size {
+        //         let color = if qrcode.get_module(x, y) {
+        //             BinaryColor::On
+        //         } else {
+        //             BinaryColor::Off
+        //         };
+        //         self.display.set((point.x + x as i32) as usize, (point.y + y as i32) as usize, color.is_on())?;
+        //     }
+        // }
+        let x = StyledQrCode::from(qrcode);
+        let mut x = x.with_scale(4).with_border(100);
+        x.position = point;
+        x.draw(&mut self.display)?;
+        Ok(())
+    }
+    
     pub fn show(&self) -> Result<(), PTouchError> {
         let s = self.display.size();
         println!("Display size: {:?}", s);

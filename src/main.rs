@@ -19,23 +19,24 @@ fn main() {
     println!("Hello, world!");
     // let mut printer =
     //     printer::from_addr("labelprinter_1:9100").expect("Unable to connect to printer!");
-    // 
+    //
     // let status = printer.get_snmp_status();
     // println!("Status {:?}", status);
     // let name = printer.get_snmp_name();
     // println!("name {:?}", name);
     // let model = printer.get_snmp_model();
     // println!("model {:?}", model);
-    // 
+    //
     // let status = printer.get_snmp_status();
     // println!("Status {:?}", status);
 
 
 
     let mut render = Render::new(RenderConfig::default());
-    
+
 
     render.render_text("Hello Rust!", Point::new(1000,61)).expect("Failed to render text");
+    render.render_qrcode("gew",Point::new(500,0)).expect("TODO: panic message");
     render.show().expect("cannot show");
 
     // sleep 1 sec
