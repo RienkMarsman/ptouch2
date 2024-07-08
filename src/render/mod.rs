@@ -39,7 +39,7 @@ pub struct RenderConfig {
 impl Default for RenderConfig {
     fn default() -> Self {
         Self {
-            min_x: 320,
+            min_x: 32,
             max_x: 10 * 1024,
             y: 696,
             orientation: Orientation::Vertical,
@@ -63,12 +63,15 @@ impl Render {
     }
 
     pub fn render_text(&mut self, text: &str , point: Point) -> Result<(), PTouchError> {
-        
-        // TODO implement if text fits 
+
+        // TODO implement if text fits
         let character_style = MonoTextStyle::new(&FONT_6X10, BinaryColor::On);
         let mut x = Text::new(text, point, character_style);
-        println!("{:?}",x);
-        x.draw(&mut self.display)?;
+        println!("{:?}",x.bounding_box().points());
+        let y = x.character_style.font.image;
+        y.draw(&mut self.display)?;
+        println!("{:#?}",y.bounding_box());
+
         Ok(())
     }
 
@@ -110,7 +113,7 @@ impl Render {
         x.draw(&mut self.display)?;
         Ok(())
     }
-    
+
     pub fn show(&self) -> Result<(), PTouchError> {
         let s = self.display.size();
         println!("Display size: {:?}", s);

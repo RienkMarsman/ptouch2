@@ -35,8 +35,8 @@ fn main() {
     let mut render = Render::new(RenderConfig::default());
 
 
-    render.render_text("Hello Rust!", Point::new(1000,61)).expect("Failed to render text");
-    render.render_qrcode("gew",Point::new(500,0)).expect("TODO: panic message");
+    render.render_text("Hello Rust!", Point::new(1,61)).expect("Failed to render text");
+    render.render_qrcode("https://lib.rs/crates/embedded-graphics-transform",Point::new(1,0)).expect("TODO: panic message");
     render.show().expect("cannot show");
 
     // sleep 1 sec
